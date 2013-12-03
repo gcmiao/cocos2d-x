@@ -5,11 +5,16 @@
 #include "ScriptingCore.h"
 #include "generated/jsb_cocos2dx_auto.hpp"
 #include "generated/jsb_cocos2dx_extension_auto.hpp"
+#include "generated/jsb_cocos2dx_studio_auto.hpp"
 #include "jsb_cocos2dx_extension_manual.h"
+#include "jsb_cocos2dx_studio_manual.h"
 #include "cocos2d_specifics.hpp"
 #include "js_bindings_chipmunk_registration.h"
 #include "js_bindings_system_registration.h"
 #include "js_bindings_ccbreader.h"
+#include "jsb_opengl_registration.h"
+#include "XMLHTTPRequest.h"
+#include "jsb_websocket.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -20,7 +25,7 @@ AppDelegate::AppDelegate()
 
 AppDelegate::~AppDelegate()
 {
-    CCScriptEngineManager::sharedManager()->purgeSharedManager();
+    CCScriptEngineManager::purgeSharedManager();
 }
 
 bool AppDelegate::applicationDidFinishLaunching()
@@ -40,15 +45,20 @@ bool AppDelegate::applicationDidFinishLaunching()
     sc->addRegisterCallback(register_all_cocos2dx_extension);
     sc->addRegisterCallback(register_all_cocos2dx_extension_manual);
     sc->addRegisterCallback(register_cocos2dx_js_extensions);
+    sc->addRegisterCallback(register_all_cocos2dx_studio);
+    sc->addRegisterCallback(register_all_cocos2dx_studio_manual);
     sc->addRegisterCallback(register_CCBuilderReader);
     sc->addRegisterCallback(jsb_register_chipmunk);
     sc->addRegisterCallback(jsb_register_system);
-    
+    sc->addRegisterCallback(JSB_register_opengl);
+    sc->addRegisterCallback(MinXmlHttpRequest::_js_register);
+    sc->addRegisterCallback(register_jsb_websocket);
+
     sc->start();
     
     CCScriptEngineProtocol *pEngine = ScriptingCore::getInstance();
     CCScriptEngineManager::sharedManager()->setScriptEngine(pEngine);
-    ScriptingCore::getInstance()->runScript("main.js");
+    ScriptingCore::getInstance()->runScript("cocos2d-jsb.js");
        
     return true;
 }

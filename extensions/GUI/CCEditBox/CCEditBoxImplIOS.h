@@ -67,7 +67,10 @@
 NS_CC_EXT_BEGIN
 
 class CCEditBox;
-
+/**
+ *  @js NA
+ *  @lua NA
+ */
 class CCEditBoxImplIOS : public CCEditBoxImpl
 {
 public:
@@ -105,6 +108,7 @@ private:
 	void			initInactiveLabels(const CCSize& size);
 	void			setInactiveText(const char* pText);
 	void			adjustTextFieldPosition();
+    void            placeInactiveLabels();
 	
     CCLabelTTF*     m_pLabel;
     CCLabelTTF*     m_pLabelPlaceHolder;

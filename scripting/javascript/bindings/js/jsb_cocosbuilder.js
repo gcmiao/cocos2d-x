@@ -19,13 +19,9 @@ cc.BuilderReader.load = function(file, owner, parentSize)
     
     var node;
 
-    if (owner && parentSize)
+    if (parentSize)
     {
-        node = reader.load(file, owner, parentSize);
-    }
-    else if (owner)
-    {
-        node = reader.load(file,owner);
+        node = reader.load(file, null, parentSize);
     }
     else
     {
@@ -44,7 +40,22 @@ cc.BuilderReader.load = function(file, owner, parentSize)
             var callbackName = ownerCallbackNames[i];
             var callbackNode = ownerCallbackNodes[i];
 
-            callbackNode.setCallback(owner[callbackName], owner);
+           if (owner[callbackName] === undefined)
+            {
+                cc.log("Warning: " + "owner." + callbackName + " is undefined.");
+            }
+            else
+            {
+                if(callbackNode instanceof cc.ControlButton)
+                {
+                    var ownerCallbackControlEvents = reader.getOwnerCallbackControlEvents();
+                    callbackNode.addTargetWithActionForControlEvents(owner, owner[callbackName], ownerCallbackControlEvents[i]);
+                }
+                else
+                {
+                    callbackNode.setCallback(owner[callbackName], owner);
+                }
+            }
         }
 
         // Variables
@@ -90,7 +101,22 @@ cc.BuilderReader.load = function(file, owner, parentSize)
             var callbackName = documentCallbackNames[j];
             var callbackNode = documentCallbackNodes[j];
 
-            callbackNode.setCallback(controller[callbackName], controller);
+            if (controller[callbackName] === undefined)
+            {
+                cc.log("Warning: " + documentControllerName + "." + callbackName + " is undefined.");
+            }
+            else
+            {
+                if(callbackNode instanceof cc.ControlButton)
+                {
+                    var documentCallbackControlEvents = animationManager.getDocumentCallbackControlEvents();
+                    callbackNode.addTargetWithActionForControlEvents(controller, controller[callbackName], documentCallbackControlEvents[j]); 
+                }
+                else
+                {
+                    callbackNode.setCallback(controller[callbackName], controller);
+                }
+            }
         }
 
 
@@ -109,6 +135,33 @@ cc.BuilderReader.load = function(file, owner, parentSize)
         if (typeof(controller.onDidLoadFromCCB) == "function")
         {
             controller.onDidLoadFromCCB();
+        }
+
+        // Setup timeline callbacks
+        var keyframeCallbacks = animationManager.getKeyframeCallbacks();
+        for (var j = 0; j < keyframeCallbacks.length; j++)
+        {
+            var callbackSplit = keyframeCallbacks[j].split(":");
+            var callbackType = callbackSplit[0];
+            var callbackName = callbackSplit[1];
+            
+            if (callbackType == 1) // Document callback
+            {
+                var callfunc = cc.CallFunc.create(controller[callbackName], controller);
+                animationManager.setCallFunc(callfunc, keyframeCallbacks[j]);
+            }
+            else if (callbackType == 2 && owner) // Owner callback
+            {
+                var callfunc = cc.CallFunc.create(owner[callbackName], owner);
+                animationManager.setCallFunc(callfunc, keyframeCallbacks[j]);
+            }
+        }
+        
+        // Start animation
+        var autoPlaySeqId = animationManager.getAutoPlaySequenceId();
+        if (autoPlaySeqId != -1)
+        {
+            animationManager.runAnimationsForSequenceIdTweenDuration(autoPlaySeqId, 0);
         }
     }
 

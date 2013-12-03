@@ -2,9 +2,39 @@
 // cocos2d constants
 //
 
-require('jsb_cocos2d_constants.js');
-
 var cc = cc || {};
+
+/**
+ * Device type
+ * @constant
+ * @type {Object}
+ */
+cc.TARGET_PLATFORM = {
+    WINDOWS:0,
+    LINUX:1,
+    MACOS:2,
+    ANDROID:3,
+    IPHONE:4,
+    IPAD:5,
+    BLACKBERRY:6,
+    NACL:7,
+    EMSCRIPTEN:8,
+    MOBILE_BROWSER:100,
+    PC_BROWSER:101
+};
+
+cc.LANGUAGE_ENGLISH    = 0;
+cc.LANGUAGE_CHINESE    = 1;
+cc.LANGUAGE_FRENCH     = 2;
+cc.LANGUAGE_ITALIAN    = 3;
+cc.LANGUAGE_GERMAN     = 4;
+cc.LANGUAGE_SPANISH    = 5;
+cc.LANGUAGE_RUSSIAN    = 6;
+cc.LANGUAGE_KOREAN     = 7;
+cc.LANGUAGE_JAPANESE   = 8;
+cc.LANGUAGE_HUNGARIAN  = 9;
+cc.LANGUAGE_PORTUGUESE = 10;
+cc.LANGUAGE_ARABIC     = 11;
 
 cc.DIRECTOR_PROJECTION_2D = 0;
 cc.DIRECTOR_PROJECTION_3D = 1;
@@ -86,7 +116,7 @@ cc._reuse_size = {width:0, height:0};
 cc._reuse_rect = {x:0, y:0, width:0, height:0};
 cc._reuse_color3b = {r:255, g:255, b:255 };
 cc._reuse_color4b = {r:255, g:255, b:255, a:255 };
-cc.log = cc.log || log;
+cc.log = cc._cocosplayerLog || cc.log || log;
 
 //
 // Color 3B
@@ -122,6 +152,20 @@ cc._c4b = function( r, g, b, a )
 cc.c4 = cc.c4b;
 cc._c4 = cc._c4b;
 
+/**
+ * convert Color3B to a string of color for style.
+ * e.g.  Color3B(255,6,255)  to : "#ff06ff"
+ * @param clr
+ * @return {String}
+ */
+cc.convertColor3BtoHexString = function (clr) {
+    var hR = clr.r.toString(16);
+    var hG = clr.g.toString(16);
+    var hB = clr.b.toString(16);
+    var stClr = "#" + (clr.r < 16 ? ("0" + hR) : hR) + (clr.g < 16 ? ("0" + hG) : hG) + (clr.b < 16 ? ("0" + hB) : hB);
+    return stClr;
+};
+
 //
 // Color 4F
 //
@@ -153,6 +197,10 @@ cc.pointEqualToPoint = function (point1, point2) {
     return ((point1.x == point2.x) && (point1.y == point2.y));
 };
 
+cc.PointZero = function () {
+    return cc.p(0, 0);
+};
+
 //
 // Grid
 //
@@ -179,6 +227,9 @@ cc._size = function(w,h)
 cc.sizeEqualToSize = function (size1, size2)
 {
     return ((size1.width == size2.width) && (size1.height == size2.height));
+};
+cc.SizeZero = function () {
+    return cc.size(0, 0);
 };
 
 //
@@ -269,6 +320,86 @@ cc.rectIntersection = function (rectA, rectB) {
     intersection.width = Math.min(rectA.x+rectA.width, rectB.x+rectB.width) - intersection.x;
     intersection.height = Math.min(rectA.y+rectA.height, rectB.y+rectB.height) - intersection.y;
     return intersection;
+};
+
+cc.RectZero = function () {
+    return cc.rect(0, 0, 0, 0);
+};
+
+cc.VisibleRect = {
+    _topLeft:cc.p(0,0),
+    _topRight:cc.p(0,0),
+    _top:cc.p(0,0),
+    _bottomLeft:cc.p(0,0),
+    _bottomRight:cc.p(0,0),
+    _bottom:cc.p(0,0),
+    _center:cc.p(0,0),
+    _left:cc.p(0,0),
+    _right:cc.p(0,0),
+    _width:0,
+    _height:0,
+    init:function(size){
+        this._width = size.width;
+        this._height = size.height;
+
+        var w = this._width;
+        var h = this._height;
+
+        //top
+        this._topLeft.y = h;
+        this._topRight.x = w;
+        this._topRight.y = h;
+        this._top.x = w/2;
+        this._top.y = h;
+
+        //bottom
+        this._bottomRight.x = w;
+        this._bottom.x = w/2;
+
+        //center
+        this._center.x = w/2;
+        this._center.y = h/2;
+
+        //left
+        this._left.y = h/2;
+
+        //right
+        this._right.x = w;
+        this._right.y = h/2;
+    },
+    getWidth:function(){
+        return this._width;
+    },
+    getHeight:function(){
+        return this._height;
+    },
+    topLeft:function(){
+        return this._topLeft;
+    },
+    topRight:function(){
+        return this._topRight;
+    },
+    top:function(){
+        return this._top;
+    },
+    bottomLeft:function(){
+        return this._bottomLeft;
+    },
+    bottomRight:function(){
+        return this._bottomRight;
+    },
+    bottom:function(){
+        return this._bottom;
+    },
+    center:function(){
+        return this._center;
+    },
+    left:function(){
+        return this._left;
+    },
+    right:function(){
+        return this._right;
+    }
 };
 
 //
@@ -379,17 +510,7 @@ cc.LayerMultiplex.create = cc.LayerMultiplex.createWithArray;
  * @param {object} jsobj subclass
  * @param {object} klass superclass
  */
-cc.associateWithNative = function( jsobj, superclass_or_instance ) {
-
-    try {
-        // Used when subclassing using the "extend" method
-        var native = new superclass_or_instance();
-        __associateObjWithNative( jsobj, native );
-    } catch(err) {
-        // Used when subclassing using the goog.inherits method
-       __associateObjWithNative( jsobj, superclass_or_instance );
-   }
-};
+cc.associateWithNative = function( jsobj, superclass_or_instance ) {};
 
 //
 // JSB supports 2 official ways to create subclasses
@@ -501,7 +622,6 @@ cc.Class.extend = function (prop) {
     return Class;
 };
 
-cc.Node.prototype.ctor = function() {};
 cc.Node.extend = cc.Class.extend;
 cc.Layer.extend = cc.Class.extend;
 cc.LayerGradient.extend = cc.Class.extend;
@@ -530,3 +650,5 @@ cc.Loader.preload = function (resources, selector, target) {
     this._instance.initWith(resources, selector, target);
     return this._instance;
 };
+
+cc.LoaderScene = cc.Loader;

@@ -91,8 +91,6 @@ class CCControl : public CCLayerRGBA
     //CCRGBAProtocol
     bool m_bIsOpacityModifyRGB;
     
-    /** Changes the priority of the button. The lower the number, the higher the priority. */
-    CC_SYNTHESIZE(int, m_nDefaultTouchPriority, DefaultTouchPriority);
     /** The current control state constant. */
     CC_SYNTHESIZE_READONLY(CCControlState, m_eState, State);
 
@@ -132,12 +130,26 @@ protected:
     CCDictionary* m_pDispatchTable;
 
 public:
+    /**
+     *  @js ctor
+     */
     CCControl();
     virtual bool init(void);
+    /**
+     *  @js NA
+     *  @lua NA
+     */
     virtual ~CCControl();
 
-
+    /**
+     *  @js NA
+     *  @lua NA
+     */
     virtual void onEnter();
+    /**
+     *  @js NA
+     *  @lua NA
+     */
     virtual void onExit();
     virtual void registerWithTouchDispatcher();
 
@@ -256,7 +268,19 @@ protected:
     void removeTargetWithActionForControlEvent(CCObject* target, SEL_CCControlHandler action, CCControlEvent controlEvent);
 
     static CCControl* create();
-
+public:
+    /**
+     *  @js NA
+     */
+    void addHandleOfControlEvent(int nFunID,CCControlEvent controlEvent);
+    /**
+     *  @js NA
+     */
+    void removeHandleOfControlEvent(CCControlEvent controlEvent);
+private:
+    int  getHandleOfControlEvent(CCControlEvent controlEvent);
+private:
+    std::map<int,int> m_mapHandleOfControlEvent;
 };
 
 // end of GUI group
